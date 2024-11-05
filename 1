@@ -1,0 +1,43 @@
+import streamlit as st
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama.llms import OllamaLLM
+
+# Title of the app
+st.title("Postulate ChatBot")
+
+# Styling
+st.markdown("""
+<style> 
+.main {
+    background-color: #ffffff;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Define the prompt template
+template = """Question: {question}
+Answer: Let's think step by step."""
+prompt = ChatPromptTemplate.from_template(template)
+
+# Initialize the model
+model = OllamaLLM(model="llama3.2")
+chain = prompt | model    
+
+# Main content layout
+col1, col2 = st.columns(2)
+
+# Input for the question
+with col1:
+    question = st.text_input("Enter your question here")
+
+# Process the question
+if question:
+    with st.spinner('Thinking...'):
+        try:
+            answer = chain.invoke({"question": question})
+            st.success("Done!")
+            st.markdown(f"*Answer:* {answer}")
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
+else:
+    st.warning("Please enter a question to get an answer.")
